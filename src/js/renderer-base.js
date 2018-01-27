@@ -1,5 +1,9 @@
 import PopStateHandler from './pop-state-handler.js';
 const urlRegex = /(\W\w*)\W?(.*)/;
+import jQuery from 'jquery';
+// @ts-ignore
+require('jsrender')(jQuery);
+const $ = jQuery;
 /** Class for rendering views */
 class Renderer extends PopStateHandler {
   /**
