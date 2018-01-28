@@ -154,24 +154,25 @@ class Renderer extends PopStateHandler {
             callbackFn = dataKey;
           }
           if (callbackFn) {
-            callbackFn();
+            callbackFn(pathParams);
           }
         });
       });
     } else if (Array.isArray(jsonUrl)) {
-      Renderer.bindView(selector, view, url, async () => {
+      Renderer.bindView(selector, view, url, async (Renderer, pathParams) => {
         let contextData = await Promise.all(
           // @ts-ignore
           jsonUrl.map(url => {
             return $.getJSON(url);
           })
         );
+        // TODO: check if dataName is an array
         Renderer.renderView(view, { data: contextData });
         if (typeof dataKey === 'function') {
           callbackFn = dataKey;
         }
         if (callbackFn) {
-          callbackFn();
+          callbackFn(pathParams);
         }
       });
     }
@@ -234,7 +235,7 @@ class Renderer extends PopStateHandler {
           // console.log(contextData);
           Renderer.renderView(view, contextData);
           if (callbackFn) {
-            callbackFn();
+            callbackFn(urlParts[2]);
           }
         } else if (urlParts[1] === url) {
           contextData(Renderer, urlParts[2]);
