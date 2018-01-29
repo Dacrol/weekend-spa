@@ -60,6 +60,7 @@ class Renderer extends PopStateHandler {
    *
    * @param {string} viewFile
    * @param {Object} contextData Object containing tag arguments, for example: {salong1: salongName} for the tag {{:salong1}}. Providing the data as an array will render the template once for each item in the array. A provided function can also use the usual render function from the inherited Base class.
+   * @param {Function} [callbackFn] a function to run each time the view is rendered.
    * @param {string} [selector='#root'] default #root
    * @param {string} [viewsFolder='/views/'] default /views/
    * @memberof Renderer
@@ -67,6 +68,7 @@ class Renderer extends PopStateHandler {
   renderView (
     viewFile,
     contextData,
+    callbackFn = null,
     selector = '#root',
     viewsFolder = '/views/'
   ) {
@@ -184,6 +186,7 @@ class Renderer extends PopStateHandler {
    * @static
    * @param {string} viewFile
    * @param {Object} contextData Object containing tag arguments, for example: {salong1: salongName} for the tag {{:salong1}}. Providing the data as an array will render the template once for each item in the array. A provided function can also use the usual render function from the inherited Base class.
+   * @param {Function} [callbackFn] a function to run each time the view is rendered.
    * @param {string} [selector='#root'] default #root
    * @param {string} [viewsFolder='/views/'] default /views/
    * @memberof Renderer
@@ -191,6 +194,7 @@ class Renderer extends PopStateHandler {
   static renderView (
     viewFile,
     contextData,
+    callbackFn = null,
     selector = '#root',
     viewsFolder = '/views/'
   ) {
