@@ -2,9 +2,14 @@
   "name": "weekend-spa",
   "version": "0.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "renderer-base.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "eslint ."
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
   },
   "author": "Dacrol",
   "license": "MIT",
@@ -21,6 +26,7 @@
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-promise": "^3.6.0",
-    "eslint-plugin-standard": "^3.0.1"
+    "eslint-plugin-standard": "^3.0.1",
+    "husky": "^0.15.0-rc.3"
   }
 }
