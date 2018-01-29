@@ -60,6 +60,7 @@ class Renderer extends PopStateHandler {
    *
    * @param {string} viewFile
    * @param {Object} contextData Object containing tag arguments, for example: {salong1: salongName} for the tag {{:salong1}}. Providing the data as an array will render the template once for each item in the array. A provided function can also use the usual render function from the inherited Base class.
+   * @param {Function} [callbackFn] a function to run each time the view is rendered.
    * @param {string} [selector='#root'] default #root
    * @param {string} [viewsFolder='/views/'] default /views/
    * @memberof Renderer
@@ -67,6 +68,7 @@ class Renderer extends PopStateHandler {
   renderView (
     viewFile,
     contextData,
+    callbackFn = null,
     selector = '#root',
     viewsFolder = '/views/'
   ) {
@@ -85,16 +87,19 @@ class Renderer extends PopStateHandler {
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
    * @memberof Renderer
    */
-  static bindView (selector = null, view = '', url, contextData, callbackFn = null) {
+  static bindView (
+    selector = null,
+    view = '',
+    url,
+    contextData,
+    callbackFn = null
+  ) {
     if (selector && !$(selector).hasClass('pop') && !$(selector).prop('href')) {
       $(selector).unbind('click');
       $(selector).click(function (e) {
         e.preventDefault();
         if (typeof contextData !== 'function') {
-          Renderer.renderView(view, contextData);
-          if (callbackFn) {
-            callbackFn();
-          }
+          Renderer.renderView(view, contextData, callbackFn);
         } else {
           contextData(Renderer);
         }
@@ -125,7 +130,7 @@ class Renderer extends PopStateHandler {
     jsonUrl,
     dataName,
     dataKey = null,
-    callbackFn
+    callbackFn = null
   ) {
     if (!Array.isArray(jsonUrl)) {
       if (!jsonUrl.startsWith('/')) {
@@ -149,13 +154,10 @@ class Renderer extends PopStateHandler {
             });
           }
           // console.log(contextData);
-          Renderer.renderView(view, contextData);
           if (typeof dataKey === 'function') {
             callbackFn = dataKey;
           }
-          if (callbackFn) {
-            callbackFn(pathParams);
-          }
+          Renderer.renderView(view, contextData, callbackFn);
         });
       });
     } else if (Array.isArray(jsonUrl)) {
@@ -167,13 +169,10 @@ class Renderer extends PopStateHandler {
           })
         );
         // TODO: check if dataName is an array
-        Renderer.renderView(view, { data: contextData });
         if (typeof dataKey === 'function') {
           callbackFn = dataKey;
         }
-        if (callbackFn) {
-          callbackFn(pathParams);
-        }
+        Renderer.renderView(view, { data: contextData }, callbackFn);
       });
     }
   }
@@ -184,6 +183,7 @@ class Renderer extends PopStateHandler {
    * @static
    * @param {string} viewFile
    * @param {Object} contextData Object containing tag arguments, for example: {salong1: salongName} for the tag {{:salong1}}. Providing the data as an array will render the template once for each item in the array. A provided function can also use the usual render function from the inherited Base class.
+   * @param {Function} [callbackFn] a function to run each time the view is rendered.
    * @param {string} [selector='#root'] default #root
    * @param {string} [viewsFolder='/views/'] default /views/
    * @memberof Renderer
@@ -191,6 +191,7 @@ class Renderer extends PopStateHandler {
   static renderView (
     viewFile,
     contextData,
+    callbackFn = null,
     selector = '#root',
     viewsFolder = '/views/'
   ) {
@@ -210,6 +211,9 @@ class Renderer extends PopStateHandler {
     const url = viewsFolder + viewFile;
     $.get(url, function (data) {
       $(selector).html($.templates(data).render(contextData));
+      if (callbackFn) {
+        callbackFn();
+      }
       // console.log(contextData);
     });
   }
@@ -233,9 +237,10 @@ class Renderer extends PopStateHandler {
           // console.log('!')
           Object.assign(contextData, { pathParams: urlParts[2] });
           // console.log(contextData);
-          Renderer.renderView(view, contextData);
           if (callbackFn) {
-            callbackFn(urlParts[2]);
+            Renderer.renderView(view, contextData, callbackFn(urlParts[2]));
+          } else {
+            Renderer.renderView(view, contextData);
           }
         } else if (urlParts[1] === url) {
           contextData(Renderer, urlParts[2]);
