@@ -2,7 +2,7 @@
   "name": "weekend-spa",
   "version": "0.0.0",
   "description": "",
-  "main": "renderer-base.js",
+  "main": "src/js/renderer-base.js",
   "scripts": {
     "lint": "eslint ."
   },
