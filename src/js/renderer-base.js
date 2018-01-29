@@ -119,7 +119,7 @@ class Renderer extends PopStateHandler {
    * @param {string} url
    * @param {(string|string[])} jsonUrl
    * @param {(string|string[])} dataName name of the tags as they are written in the html template file, for example: ['salong1', 'salong2'] for a template with the tags {{:salong1}} & {{:salong2}}. Pass a single string to access the entire JSON object as is.
-   * @param {string} [dataKey] name of the object key that holds the desired data, for example: 'name' in salons.json
+   * @param {string} [dataKey] name of the object key that holds the desired data, for example: 'name' in salons.json. Setting this parameter lets you only access the selected keys from the JSON and nothing else.
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
    * @memberof Renderer
    */
@@ -168,11 +168,25 @@ class Renderer extends PopStateHandler {
             return $.getJSON(url);
           })
         );
-        // TODO: check if dataName is an array
         if (typeof dataKey === 'function') {
           callbackFn = dataKey;
         }
-        Renderer.renderView(view, { data: contextData }, callbackFn);
+        if (!dataName) {
+          dataName = 'data';
+        }
+        if (typeof dataName === 'string') {
+          Renderer.renderView(view, { [dataName]: contextData }, callbackFn);
+        } else if (
+          Array.isArray(dataName) &&
+          Array.isArray(jsonUrl) &&
+          dataName.length === jsonUrl.length
+        ) {
+          let data = {};
+          dataName.forEach((name, index) => {
+            Object.assign(data, { [name]: contextData[index] });
+          });
+          Renderer.renderView(view, data, callbackFn);
+        }
       });
     }
   }
