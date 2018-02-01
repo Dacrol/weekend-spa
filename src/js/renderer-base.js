@@ -11,8 +11,8 @@ class Renderer extends PopStateHandler {
    * Binds a view to a selector and a URL
    *
    * @param {string} [selector] Only necessary if the selector does not have the class 'pop'
-   * @param {string} [view]
-   * @param {string} url
+   * @param {string} [view] The HTML file to render
+   * @param {string} url The path of the view, example: /current
    * @param {Object} contextData Object containing tag arguments, for example: {salong1: salongName} for the tag {{:salong1}}, or a function that ends by calling Renderer.renderView. Providing the data as an array will render the template once for each item in the array. A provided function can also use the usual render function from the inherited Base class.
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
    * @memberof Renderer
@@ -82,8 +82,8 @@ class Renderer extends PopStateHandler {
    *
    * @static
    * @param {string} [selector] Only necessary if the selector does not have the class 'pop'
-   * @param {string} [view]
-   * @param {string} url
+   * @param {string} [view] The HTML file to render
+   * @param {string} url The path of the view, example: /current
    * @param {Object} contextData Object containing tag arguments, for example: {salong1: salongName} for the tag {{:salong1}}, or a function that ends by calling Renderer.renderView. Providing the data as an array will render the template once for each item in the array. A provided function can also use the usual render function from the inherited Base class.
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
    * @memberof Renderer
@@ -212,32 +212,39 @@ class Renderer extends PopStateHandler {
     viewsFolder = '/views/'
   ) {
     return new Promise((resolve, reject) => {
-      // console.log(...arguments);
-      if (!(contextData instanceof Object)) {
-        contextData = {};
-      }
-      if (viewFile.startsWith('/')) {
-        viewFile = /[^/](.*)$/.exec(viewFile)[0];
-      }
-      if (!(viewFile.endsWith('.html') || viewFile.endsWith('.htm'))) {
-        viewFile = viewFile + '.html';
-      }
-      if (!viewsFolder.endsWith('/')) {
-        viewsFolder = viewsFolder + '/';
-      }
-      const url = viewsFolder + viewFile;
-      $.get(url, function (data) {
-        try {
-          $(selector).html($.templates(data).render(contextData));
-          if (callbackFn) {
-            callbackFn();
-          }
-          resolve();
-        } catch (e) {
-          reject(e);
+      if (viewFile) {
+        // console.log(...arguments);
+        if (!(contextData instanceof Object)) {
+          contextData = {};
         }
-        // console.log(contextData);
-      });
+        if (viewFile.startsWith('/')) {
+          viewFile = /[^/](.*)$/.exec(viewFile)[0];
+        }
+        if (!(viewFile.endsWith('.html') || viewFile.endsWith('.htm'))) {
+          viewFile = viewFile + '.html';
+        }
+        if (!viewsFolder.endsWith('/')) {
+          viewsFolder = viewsFolder + '/';
+        }
+        const url = viewsFolder + viewFile;
+        $.get(url, function (data) {
+          try {
+            $(selector).html($.templates(data).render(contextData));
+            if (callbackFn) {
+              callbackFn(contextData);
+            }
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
+          // console.log(contextData);
+        });
+      } else if (callbackFn && typeof callbackFn === 'function') {
+        callbackFn(contextData);
+        resolve();
+      } else {
+        reject(new Error('No viewFile or function supplied'));
+      }
     });
   }
   /**
@@ -261,12 +268,12 @@ class Renderer extends PopStateHandler {
           Object.assign(contextData, { pathParams: urlParts[2] });
           // console.log(contextData);
           if (callbackFn) {
-            Renderer.renderView(view, contextData, callbackFn(urlParts[2]));
+            Renderer.renderView(view, contextData, callbackFn);
           } else {
             Renderer.renderView(view, contextData);
           }
         } else if (urlParts[1] === url) {
-          contextData(Renderer, urlParts[2]);
+          contextData(Renderer, { pathParams: urlParts[2] });
         }
       } catch (error) {
         console.warn('Invalid url: ', error);
