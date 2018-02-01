@@ -273,7 +273,7 @@ class Renderer extends PopStateHandler {
             Renderer.renderView(view, contextData);
           }
         } else if (urlParts[1] === url) {
-          contextData(Renderer, { pathParams: urlParts[2] });
+          contextData(Renderer, urlParts[2]);
         }
       } catch (error) {
         console.warn('Invalid url: ', error);
