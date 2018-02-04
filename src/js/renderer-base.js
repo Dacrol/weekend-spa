@@ -3,7 +3,7 @@ import jQuery from 'jquery';
 // @ts-ignore
 require('jsrender')(jQuery);
 const $ = jQuery;
-const urlRegex = /(\W\w*)\W?(.*)/;
+const urlRegex = /(\W[^/]*)\/?(.*)/;
 
 /** Class for rendering views */
 class Renderer extends PopStateHandler {
