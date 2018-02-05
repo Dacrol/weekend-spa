@@ -8,13 +8,12 @@ const urlRegex = /(\W[^/]*)\/?(.*)/;
 /** Class for rendering views */
 class Renderer extends PopStateHandler {
   /**
-   * Binds a view to a selector and a URL
+   * Binds a view to a URL
    *
-   * @param {string} [selector] Only necessary if the selector does not have the class 'pop'
    * @param {string} [view] The HTML file to render
-   * @param {string} url The path of the view, example: /current
-   * @param {Object} contextData Object containing tag arguments, for example: {salong1: salongName} for the tag {{:salong1}}, or a function that ends by calling Renderer.renderView. Providing the data as an array will render the template once for each item in the array. A provided function can also use the usual render function from the inherited Base class.
-   * @param {Function} [callbackFn] a function to run each time the view is rendered.
+   * @param {string} url The path of the view
+   * @param {Object|Function} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
+   * @param {Function} [callbackFn] a function to run after the view is rendered.
    * @memberof Renderer
    */
   bindView (selector, view = '', url, contextData, callbackFn) {
@@ -58,10 +57,10 @@ class Renderer extends PopStateHandler {
   /**
    * Renders a view
    *
-   * @param {string} viewFile
-   * @param {Object} contextData Object containing tag arguments, for example: {salong1: salongName} for the tag {{:salong1}}. Providing the data as an array will render the template once for each item in the array. A provided function can also use the usual render function from the inherited Base class.
-   * @param {Function} [callbackFn] a function to run each time the view is rendered.
-   * @param {string} [selector='#root'] default #root
+   * @param {string|Function} viewFile Pass empty string to only call the callback function.
+   * @param {Object|Function} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
+   * @param {Function} [callbackFn] a function to run after the view is rendered.
+   * @param {string} [selector='#root'] Target selector to insert html in, default #root
    * @param {string} [viewsFolder='/views/'] default /views/
    * @returns {Promise}
    * @memberof Renderer
@@ -78,24 +77,65 @@ class Renderer extends PopStateHandler {
   }
 
   /**
+   * Binds a view to a URL
+   *
+   * @static
+   * @param {string} [view] The HTML file to render
+   * @param {string} url The path of the view
+   * @param {Object|Function} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
+   * @param {Function} [callbackFn] a function to run after the view is rendered.
+   * @memberof Renderer
+   */
+  static bindView (view = '', url, contextData, callbackFn) {
+    $(document).ready(function () {
+      const path = location.pathname;
+      const urlParts = urlRegex.exec(path);
+      // console.log(urlParts);
+      try {
+        if (urlParts[1] === url && typeof contextData !== 'function') {
+          // console.log('!')
+          Object.assign(contextData, { pathParams: urlParts[2] });
+          // console.log(contextData);
+          if (callbackFn) {
+            Renderer.renderView(view, contextData, callbackFn);
+          } else {
+            Renderer.renderView(view, contextData);
+          }
+        } else if (urlParts[1] === url) {
+          contextData(Renderer, urlParts[2]);
+        }
+      } catch (error) {
+        console.warn('Invalid url: ', error);
+      }
+    });
+  }
+
+  /**
    * Binds a view to a selector and a URL
    *
    * @static
-   * @param {string} [selector] Only necessary if the selector does not have the class 'pop'
+   * @param {string} selector Selector to bind to
    * @param {string} [view] The HTML file to render
-   * @param {string} url The path of the view, example: /current
-   * @param {Object} contextData Object containing tag arguments, for example: {salong1: salongName} for the tag {{:salong1}}, or a function that ends by calling Renderer.renderView. Providing the data as an array will render the template once for each item in the array. A provided function can also use the usual render function from the inherited Base class.
+   * @param {string} url The path of the view
+   * @param {Object|Function} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
    * @memberof Renderer
    */
-  static bindView (
-    selector = null,
+  static bindViewToSelector (
+    selector,
     view = '',
     url,
     contextData,
     callbackFn = null
   ) {
-    if (selector && !$(selector).hasClass('pop') && !$(selector).prop('href')) {
+    if ($(selector).length === 0) {
+      throw new Error('No selector "' + selector + '" found.');
+    }
+    if (url && !url.startsWith('/')) {
+      url = '/' + url;
+    }
+    if (!$(selector).hasClass('pop') && !$(selector).prop('href')) {
+      // Selector is not a link.
       $(selector).unbind('click');
       $(selector).click(function (e) {
         e.preventDefault();
@@ -105,10 +145,17 @@ class Renderer extends PopStateHandler {
           contextData(Renderer);
         }
       });
-    } else if (selector && !$(selector).prop('href')) {
-      $(selector).addClass('pop'); // TODO: improve adding pop class
+    } else if ($(selector).prop('href')) {
+      // Selector is a link but does not have the pop class, add it.
+      $(selector).addClass('pop');
+    } else if ($(selector).is('a')) {
+      // Selector has the pop class and is a link but does not have a href, add it.
+      $(selector).prop('href', url);
     }
-    Renderer.bindViewToUrl(view, url, contextData, callbackFn);
+    // Bind the view if there's a url.
+    if (url) {
+      Renderer.bindView(view, url, contextData, callbackFn);
+    }
   }
 
   /**
@@ -196,10 +243,10 @@ class Renderer extends PopStateHandler {
    * Renders a view
    *
    * @static
-   * @param {string} viewFile
-   * @param {Object} contextData Object containing tag arguments, for example: {salong1: salongName} for the tag {{:salong1}}. Providing the data as an array will render the template once for each item in the array. A provided function can also use the usual render function from the inherited Base class.
-   * @param {Function} [callbackFn] a function to run each time the view is rendered.
-   * @param {string} [selector='#root'] default #root
+   * @param {string|Function} viewFile Pass empty string to only call the callback function.
+   * @param {Object|Function} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
+   * @param {Function} [callbackFn] a function to run after the view is rendered.
+   * @param {string} [selector='#root'] Target selector to insert html in, default #root
    * @param {string} [viewsFolder='/views/'] default /views/
    * @returns {Promise}
    * @memberof Renderer
@@ -212,8 +259,10 @@ class Renderer extends PopStateHandler {
     viewsFolder = '/views/'
   ) {
     return new Promise((resolve, reject) => {
-      if (viewFile) {
-        // console.log(...arguments);
+      if (typeof viewFile === 'function' && !callbackFn) {
+        callbackFn = viewFile;
+      }
+      if (viewFile && typeof viewFile === 'string') {
         if (!(contextData instanceof Object)) {
           contextData = {};
         }
@@ -244,39 +293,6 @@ class Renderer extends PopStateHandler {
         resolve();
       } else {
         reject(new Error('No viewFile or function supplied'));
-      }
-    });
-  }
-  /**
-   * Binds a view to a URL
-   *
-   * @static
-   * @param {string} [view]
-   * @param {string} url
-   * @param {Object} contextData Object containing tag arguments, for example: {salong1: salongName} for the tag {{:salong1}}, or a function that ends by calling Renderer.renderView. Providing the data as an array will render the template once for each item in the array. A provided function can also use the usual render function from the inherited Base class.
-   * @param {Function} [callbackFn] a function to run each time the view is rendered.
-   * @memberof Renderer
-   */
-  static bindViewToUrl (view = '', url, contextData, callbackFn) {
-    $(document).ready(function () {
-      const path = location.pathname;
-      const urlParts = urlRegex.exec(path);
-      // console.log(urlParts);
-      try {
-        if (urlParts[1] === url && typeof contextData !== 'function') {
-          // console.log('!')
-          Object.assign(contextData, { pathParams: urlParts[2] });
-          // console.log(contextData);
-          if (callbackFn) {
-            Renderer.renderView(view, contextData, callbackFn);
-          } else {
-            Renderer.renderView(view, contextData);
-          }
-        } else if (urlParts[1] === url) {
-          contextData(Renderer, urlParts[2]);
-        }
-      } catch (error) {
-        console.warn('Invalid url: ', error);
       }
     });
   }
