@@ -16,7 +16,7 @@ class Renderer extends PopStateHandler {
    * @param {Function} [callbackFn] a function to run after the view is rendered.
    * @memberof Renderer
    */
-  bindView (selector, view = '', url, contextData, callbackFn) {
+  bindView (view = '', url, contextData, callbackFn) {
     let viewMethod = () => {
       // @ts-ignore
       Renderer.bindView(...arguments);
