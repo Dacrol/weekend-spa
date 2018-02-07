@@ -56,9 +56,9 @@ class Renderer extends PopStateHandler {
   /**
    * Renders a view
    *
-   * @param {string|Function} viewFile Pass empty string to only call the callback function.
-   * @param {Object|Function} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
-   * @param {Function} [callbackFn] a function to run after the view is rendered.
+   * @param {string|function(Object)} viewFile Pass empty string to only call the callback function.
+   * @param {Object} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array.
+   * @param {function(Object)} [callbackFn] a function with parameter (contextData) to run after the view is rendered.
    * @param {string} [selector='#root'] Target selector to insert html in, default #root
    * @param {string} [viewsFolder='/views/'] default /views/
    * @returns {Promise}
@@ -166,15 +166,16 @@ class Renderer extends PopStateHandler {
   }
 
   /**
-   * Binds a view to a selector and a URL, and fetches JSON data to use as tag arguments. For more complex operations than basic JSON fetching, please use the normal bindView with contextData supplied as a function.
+   * Binds a view to a URL (and optionally a selector), and fetches JSON data to use as tag arguments. For more complex operations than basic JSON fetching, please use the normal bindView with contextData supplied as a function.
    *
    * @static
-   * @param {string} [selector] Only necessary if the selector does not have the class 'pop'
-   * @param {string} view
-   * @param {string} url
-   * @param {(string|string[])} jsonUrl
+   * @param {string} view name of the html file with the template to render
+   * @param {string} url URL to bind to
+   * @param {(string|string[])} jsonUrl URL(s) for JSON to fetch
    * @param {(string|string[])} dataName name of the data as it is written in the html template file, for example: 'movie' results in the data being accessible with {{:movie}}. Pass one string for each JSON.
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
+   *
+   * @param {string} [selector] Only necessary if the selector does not have the class 'pop'
    * @memberof Renderer
    */
   static bindViewWithJSON (
@@ -250,9 +251,9 @@ class Renderer extends PopStateHandler {
    * Renders a view
    *
    * @static
-   * @param {string|Function} viewFile Pass empty string to only call the callback function.
-   * @param {Object|Function} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
-   * @param {Function} [callbackFn] a function to run after the view is rendered.
+   * @param {string|function(Object)} viewFile Pass empty string to only call the callback function.
+   * @param {Object} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array.
+   * @param {function(Object)} [callbackFn] a function with parameter (contextData) to run after the view is rendered.
    * @param {string} [selector='#root'] Target selector to insert html in, default #root
    * @param {string} [viewsFolder='/views/'] default /views/
    * @returns {Promise}
