@@ -34,7 +34,7 @@ class Renderer extends PopStateHandler {
    * @param {(string|string[])} jsonUrl URL(s) for JSON to fetch
    * @param {(string|string[])} dataName name of the data as it is written in the html template file, for example: 'movie' results in the data being accessible with {{:movie}}. Pass one string for each JSON.
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
-   * @param {Object} additionalData Additional data to be available in the template and callback. Must be a "true" object that can be Object.assign()ed onto the fetched data.
+   * @param {Object} [additionalData] Additional data to be available in the template and callback. Must be a "true" object that can be Object.assign()ed onto the fetched data.
    * @param {string} [selector] Only necessary if the selector does not have the class 'pop'
    * @memberof Renderer
    */
@@ -176,7 +176,7 @@ class Renderer extends PopStateHandler {
    * @param {(string|string[])} jsonUrl URL(s) for JSON to fetch
    * @param {(string|string[])} dataName name of the data as it is written in the html template file, for example: 'movie' results in the data being accessible with {{:movie}}. Pass one string for each JSON.
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
-   * @param {Object} additionalData Additional data to be available in the template and callback. Must be a "true" object that can be Object.assign()ed onto the fetched data.
+   * @param {Object} [additionalData] Additional data to be available in the template and callback. Must be a "true" object that can be Object.assign()ed onto the fetched data.
    * @param {string} [selector] Only necessary if the selector does not have the class 'pop'
    * @memberof Renderer
    */

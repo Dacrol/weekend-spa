@@ -12,12 +12,12 @@ Class for rendering views
 * [Renderer](#Renderer)
     * _instance_
         * [.bindView([view], url, contextData, [callbackFn], [selector])](#Renderer+bindView)
-        * [.bindViewWithJSON(view, url, jsonUrl, dataName, [callbackFn], additionalData, [selector])](#Renderer+bindViewWithJSON)
+        * [.bindViewWithJSON(view, url, jsonUrl, dataName, [callbackFn], [additionalData], [selector])](#Renderer+bindViewWithJSON)
         * [.renderView(viewFile, contextData, [callbackFn], [selector], [viewsFolder])](#Renderer+renderView) ⇒ <code>Promise</code>
     * _static_
         * [.bindView([view], url, contextData, [callbackFn], [selector])](#Renderer.bindView)
         * [.bindViewToSelector(selector, [view], url, contextData, [callbackFn])](#Renderer.bindViewToSelector)
-        * [.bindViewWithJSON(view, url, jsonUrl, dataName, [callbackFn], additionalData, [selector])](#Renderer.bindViewWithJSON)
+        * [.bindViewWithJSON(view, url, jsonUrl, dataName, [callbackFn], [additionalData], [selector])](#Renderer.bindViewWithJSON)
         * [.renderView(viewFile, contextData, [callbackFn], [selector], [viewsFolder])](#Renderer.renderView) ⇒ <code>Promise</code>
 
 <a name="Renderer+bindView"></a>
@@ -37,7 +37,7 @@ Binds a view to a URL
 
 <a name="Renderer+bindViewWithJSON"></a>
 
-### renderer.bindViewWithJSON(view, url, jsonUrl, dataName, [callbackFn], additionalData, [selector])
+### renderer.bindViewWithJSON(view, url, jsonUrl, dataName, [callbackFn], [additionalData], [selector])
 Binds a view to a URL (and optionally a selector), and fetches JSON data to use as tag arguments. For more complex operations than basic JSON fetching, please use the normal bindView with contextData supplied as a function.
 
 **Kind**: instance method of [<code>Renderer</code>](#Renderer)
@@ -49,7 +49,7 @@ Binds a view to a URL (and optionally a selector), and fetches JSON data to use 
 | jsonUrl | <code>string</code> \| <code>Array.&lt;string&gt;</code> |  | URL(s) for JSON to fetch |
 | dataName | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;data&quot;</code> | name of the data as it is written in the html template file, for example: 'movie' results in the data being accessible with {{:movie}}. Pass one string for each JSON. |
 | [callbackFn] | <code>function</code> | <code></code> | a function to run each time the view is rendered. |
-| additionalData | <code>Object</code> | <code></code> | Additional data to be available in the template and callback. Must be a "true" object that can be Object.assign()ed onto the fetched data. |
+| [additionalData] | <code>Object</code> | <code></code> | Additional data to be available in the template and callback. Must be a "true" object that can be Object.assign()ed onto the fetched data. |
 | [selector] | <code>string</code> |  | Only necessary if the selector does not have the class 'pop' |
 
 <a name="Renderer+renderView"></a>
@@ -99,7 +99,7 @@ Binds a view to a selector and a URL
 
 <a name="Renderer.bindViewWithJSON"></a>
 
-### Renderer.bindViewWithJSON(view, url, jsonUrl, dataName, [callbackFn], additionalData, [selector])
+### Renderer.bindViewWithJSON(view, url, jsonUrl, dataName, [callbackFn], [additionalData], [selector])
 Binds a view to a URL (and optionally a selector), and fetches JSON data to use as tag arguments. For more complex operations than basic JSON fetching, please use the normal bindView with contextData supplied as a function.
 
 **Kind**: static method of [<code>Renderer</code>](#Renderer)
@@ -111,7 +111,7 @@ Binds a view to a URL (and optionally a selector), and fetches JSON data to use 
 | jsonUrl | <code>string</code> \| <code>Array.&lt;string&gt;</code> |  | URL(s) for JSON to fetch |
 | dataName | <code>string</code> \| <code>Array.&lt;string&gt;</code> | <code>&quot;data&quot;</code> | name of the data as it is written in the html template file, for example: 'movie' results in the data being accessible with {{:movie}}. Pass one string for each JSON. |
 | [callbackFn] | <code>function</code> | <code></code> | a function to run each time the view is rendered. |
-| additionalData | <code>Object</code> | <code></code> | Additional data to be available in the template and callback. Must be a "true" object that can be Object.assign()ed onto the fetched data. |
+| [additionalData] | <code>Object</code> | <code></code> | Additional data to be available in the template and callback. Must be a "true" object that can be Object.assign()ed onto the fetched data. |
 | [selector] | <code>string</code> |  | Only necessary if the selector does not have the class 'pop' |
 
 <a name="Renderer.renderView"></a>
