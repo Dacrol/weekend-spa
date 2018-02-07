@@ -13,10 +13,11 @@ class Renderer extends PopStateHandler {
    * @param {string} [view] The HTML file to render
    * @param {string} url The path of the view
    * @param {Object|Function} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
-   * @param {Function} [callbackFn] a function to run after the view is rendered.
+   * @param {Function|string} [callbackFn] a function to run after the view is rendered.
+   * @param {string} [selector] Supply a selector to bind with selector instead of only url
    * @memberof Renderer
    */
-  bindView (view = '', url, contextData, callbackFn) {
+  bindView (view = '', url, contextData, callbackFn, selector = '') {
     let viewMethod = () => {
       // @ts-ignore
       Renderer.bindView(...arguments);
@@ -31,20 +32,18 @@ class Renderer extends PopStateHandler {
    * @param {string} [selector] Only necessary if the selector does not have the class 'pop'
    * @param {string} view
    * @param {string} url
-   * @param {string} jsonUrl
+   * @param {(string|string[])} jsonUrl
    * @param {(string|string[])} dataName name of the data as it is written in the html template file, for example: 'movie' results in the data being accessible with {{:movie}}. Pass one string for each JSON.
-   * @param {string} [dataKey] name of the object key that holds the desired data, for example: 'name' in salons.json
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
    * @memberof Renderer
    */
   bindViewWithJSON (
-    selector,
     view,
     url,
     jsonUrl,
-    dataName,
-    dataKey,
-    callbackFn
+    dataName = 'data',
+    callbackFn = null,
+    selector = ''
   ) {
     let viewMethod = () => {
       // @ts-ignore
@@ -83,10 +82,18 @@ class Renderer extends PopStateHandler {
    * @param {string} [view] The HTML file to render
    * @param {string} url The path of the view
    * @param {Object|Function} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
-   * @param {Function} [callbackFn] a function to run after the view is rendered.
+   * @param {Function|string} [callbackFn] a function to run after the view is rendered.
+   * @param {string} [selector] Supply a selector to bind with selector instead of only url
    * @memberof Renderer
    */
-  static bindView (view = '', url, contextData, callbackFn) {
+  static bindView (view = '', url, contextData, callbackFn, selector = '') {
+    if (typeof callbackFn === 'string') {
+      selector = callbackFn;
+      callbackFn = () => {};
+    }
+    if (selector) {
+      Renderer.bindViewToSelector(selector, view, url, contextData, callbackFn);
+    }
     $(document).ready(function () {
       const path = location.pathname;
       const urlParts = urlRegex.exec(path);
@@ -96,7 +103,7 @@ class Renderer extends PopStateHandler {
           // console.log('!')
           Object.assign(contextData, { pathParams: urlParts[2] });
           // console.log(contextData);
-          if (callbackFn) {
+          if (callbackFn && typeof callbackFn === 'function') {
             Renderer.renderView(view, contextData, callbackFn);
           } else {
             Renderer.renderView(view, contextData);
@@ -167,75 +174,75 @@ class Renderer extends PopStateHandler {
    * @param {string} url
    * @param {(string|string[])} jsonUrl
    * @param {(string|string[])} dataName name of the data as it is written in the html template file, for example: 'movie' results in the data being accessible with {{:movie}}. Pass one string for each JSON.
-   * @param {string} [dataKey] name of the object key that holds the desired data, for example: 'name' in salons.json. Setting this parameter lets you only access the selected keys from the JSON and nothing else.
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
    * @memberof Renderer
    */
   static bindViewWithJSON (
-    selector,
     view,
     url,
     jsonUrl,
-    dataName,
-    dataKey = null,
-    callbackFn = null
+    dataName = 'data',
+    callbackFn = null,
+    selector = ''
   ) {
+    if (typeof dataName === 'function' && !callbackFn) {
+      callbackFn = dataName;
+      dataName = 'data';
+    }
     if (!Array.isArray(jsonUrl)) {
       if (!jsonUrl.startsWith('/')) {
         jsonUrl = '/' + jsonUrl;
       }
-      Renderer.bindView(selector, view, url, function (Renderer, pathParams) {
-        // @ts-ignore
-        $.getJSON(jsonUrl, function (json) {
-          let contextData = { pathParams: pathParams };
-          if (!Array.isArray(dataName)) {
-            Object.assign(contextData, { [dataName]: json });
-          } else {
-            dataName.forEach((tagVariable, index) => {
-              if (!dataKey || typeof dataKey === 'function') {
-                Object.assign(contextData, { [tagVariable]: json[index] });
-              } else {
-                Object.assign(contextData, {
-                  [tagVariable]: json[index][dataKey]
-                });
-              }
-            });
-          }
-          // console.log(contextData);
-          if (typeof dataKey === 'function') {
-            callbackFn = dataKey;
-          }
-          Renderer.renderView(view, contextData, callbackFn);
-        });
-      });
-    } else if (Array.isArray(jsonUrl)) {
-      Renderer.bindView(selector, view, url, async (Renderer, pathParams) => {
-        let contextData = await Promise.all(
+      Renderer.bindView(
+        view,
+        url,
+        function (Renderer, pathParams) {
           // @ts-ignore
-          jsonUrl.map(url => {
-            return $.getJSON(url);
-          })
-        );
-        if (typeof dataKey === 'function') {
-          callbackFn = dataKey;
-        }
-        if (!dataName) {
-          dataName = 'data';
-        }
-        if (typeof dataName === 'string') {
-          Renderer.renderView(view, { [dataName]: contextData }, callbackFn);
-        } else if (
-          Array.isArray(dataName) &&
-          Array.isArray(jsonUrl) &&
-          dataName.length === jsonUrl.length
-        ) {
-          let data = {};
-          dataName.forEach((name, index) => {
-            Object.assign(data, { [name]: contextData[index] });
+          $.getJSON(jsonUrl, function (json) {
+            let contextData = { pathParams: pathParams };
+            if (!Array.isArray(dataName)) {
+              Object.assign(contextData, { [dataName]: json });
+            } else {
+              dataName.forEach((tagVariable, index) => {
+                Object.assign(contextData, { [tagVariable]: json[index] });
+              });
+            }
+            // console.log(contextData);
+            Renderer.renderView(view, contextData, callbackFn);
           });
-          Renderer.renderView(view, data, callbackFn);
-        }
-      });
+        },
+        selector
+      );
+    } else if (Array.isArray(jsonUrl)) {
+      Renderer.bindView(
+        view,
+        url,
+        async (Renderer, pathParams) => {
+          let contextData = await Promise.all(
+            // @ts-ignore
+            jsonUrl.map((url) => {
+              return $.getJSON(url);
+            })
+          );
+          if (!dataName) {
+            dataName = 'data';
+          }
+          if (typeof dataName === 'string') {
+            Renderer.renderView(view, { [dataName]: contextData }, callbackFn);
+          } else if (
+            Array.isArray(dataName) &&
+            Array.isArray(jsonUrl) &&
+            dataName.length === jsonUrl.length
+          ) {
+            let data = {};
+            dataName.forEach((name, index) => {
+              Object.assign(data, { [name]: contextData[index] });
+            });
+            Renderer.renderView(view, data, callbackFn);
+          }
+        },
+        selector
+      );
     }
   }
 
