@@ -12,12 +12,12 @@ class Renderer extends PopStateHandler {
    *
    * @param {string} [view] The HTML file to render
    * @param {string} url The path of the view
-   * @param {Object|Function} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
+   * @param {Object|Function} [contextData] Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
    * @param {function(Object)|string} [callbackFn] a function with parameter (contextData) to run after the view is rendered.
    * @param {string} [selector] Supply a selector to bind with selector instead of only url
    * @memberof Renderer
    */
-  bindView (view = '', url, contextData, callbackFn, selector = '') {
+  bindView (view = '', url, contextData = {}, callbackFn, selector = '') {
     let viewMethod = () => {
       // @ts-ignore
       Renderer.bindView(...arguments);
@@ -34,7 +34,7 @@ class Renderer extends PopStateHandler {
    * @param {(string|string[])} jsonUrl URL(s) for JSON to fetch
    * @param {(string|string[])} dataName name of the data as it is written in the html template file, for example: 'movie' results in the data being accessible with {{:movie}}. Pass one string for each JSON.
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
-   * @param {Object} [additionalData] Additional data to be available in the template and callback. Must be a "true" object that can be Object.assign()ed onto the fetched data.
+   * @param {Object|string} [additionalData] Additional data to be available in the template and callback. Must be a "true" object that can be Object.assign()ed onto the fetched data.
    * @param {string} [selector] Only necessary if the selector does not have the class 'pop'
    * @memberof Renderer
    */
@@ -59,7 +59,7 @@ class Renderer extends PopStateHandler {
    * Renders a view
    *
    * @param {string|function(Object)} viewFile Pass empty string to only call the callback function.
-   * @param {Object} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array.
+   * @param {Object} [contextData] Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array.
    * @param {function(Object)} [callbackFn] a function with parameter (contextData) to run after the view is rendered.
    * @param {string} [selector='#root'] Target selector to insert html in, default #root
    * @param {string} [viewsFolder='/views/'] default /views/
@@ -68,7 +68,7 @@ class Renderer extends PopStateHandler {
    */
   renderView (
     viewFile,
-    contextData,
+    contextData = {},
     callbackFn = null,
     selector = '#root',
     viewsFolder = '/views/'
@@ -83,12 +83,12 @@ class Renderer extends PopStateHandler {
    * @static
    * @param {string} [view] The HTML file to render
    * @param {string} url The path of the view
-   * @param {Object|Function} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
+   * @param {Object|Function} [contextData] Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
    * @param {function(Object)|string} [callbackFn] a function with parameter (contextData) to run after the view is rendered.
    * @param {string} [selector] Supply a selector to bind with selector instead of only url
    * @memberof Renderer
    */
-  static bindView (view = '', url, contextData, callbackFn, selector = '') {
+  static bindView (view = '', url, contextData = {}, callbackFn, selector = '') {
     if (typeof callbackFn === 'string') {
       selector = callbackFn;
       callbackFn = () => {};
@@ -126,7 +126,7 @@ class Renderer extends PopStateHandler {
    * @param {string} selector Selector to bind to
    * @param {string} [view] The HTML file to render
    * @param {string} url The path of the view
-   * @param {Object|Function} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
+   * @param {Object|Function} [contextData] Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
    * @param {function(Object)} [callbackFn] a function with parameter (contextData) to run each time the view is rendered.
    * @memberof Renderer
    */
@@ -134,7 +134,7 @@ class Renderer extends PopStateHandler {
     selector,
     view = '',
     url,
-    contextData,
+    contextData = {},
     callbackFn = null
   ) {
     if ($(selector).length === 0) {
@@ -176,7 +176,7 @@ class Renderer extends PopStateHandler {
    * @param {(string|string[])} jsonUrl URL(s) for JSON to fetch
    * @param {(string|string[])} dataName name of the data as it is written in the html template file, for example: 'movie' results in the data being accessible with {{:movie}}. Pass one string for each JSON.
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
-   * @param {Object} [additionalData] Additional data to be available in the template and callback. Must be a "true" object that can be Object.assign()ed onto the fetched data.
+   * @param {Object|string} [additionalData] Additional data to be available in the template and callback. Must be a "true" object that can be Object.assign()ed onto the fetched data.
    * @param {string} [selector] Only necessary if the selector does not have the class 'pop'
    * @memberof Renderer
    */
@@ -192,6 +192,10 @@ class Renderer extends PopStateHandler {
     if (typeof dataName === 'function' && !callbackFn) {
       callbackFn = dataName;
       dataName = 'data';
+    }
+    if (typeof additionalData === 'string' && !selector) {
+      selector = additionalData;
+      additionalData = null;
     }
     if (!Array.isArray(jsonUrl)) {
       if (!jsonUrl.startsWith('/')) {
@@ -274,7 +278,7 @@ class Renderer extends PopStateHandler {
    *
    * @static
    * @param {string|function(Object)} viewFile Pass empty string to only call the callback function.
-   * @param {Object} contextData Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array.
+   * @param {Object} [contextData] Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array.
    * @param {function(Object)} [callbackFn] a function with parameter (contextData) to run after the view is rendered.
    * @param {string} [selector='#root'] Target selector to insert html in, default #root
    * @param {string} [viewsFolder='/views/'] default /views/
