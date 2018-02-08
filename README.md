@@ -5,7 +5,7 @@ Wrapper for making single page applications with [JsRender](http://www.jsviews.c
 <a name="Renderer"></a>
 
 ## Renderer
-Class for rendering views
+Class for binding and rendering views
 
 **Kind**: global class
 

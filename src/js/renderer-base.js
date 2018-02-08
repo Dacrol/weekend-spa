@@ -5,7 +5,7 @@ require('jsrender')(jQuery);
 const $ = jQuery;
 const urlRegex = /(\W[^/]*)\/?(.*)/;
 
-/** Class for rendering views */
+/** Class for binding and rendering views */
 class Renderer extends PopStateHandler {
   /**
    * Binds a view to a URL
