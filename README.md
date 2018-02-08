@@ -1,5 +1,5 @@
 # Weekend-SPA
-Wrapper for making single page applications with [JsRender](http://www.jsviews.com/#jsrapi).
+Wrapper for making single page applications with [JsRender](http://www.jsviews.com/). See [JsRender API](http://www.jsviews.com/#jsrapi) for how to make html templates.
 ## API 
 
 <a name="Renderer"></a>
