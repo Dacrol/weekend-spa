@@ -1,7 +1,7 @@
 
 import jQuery from 'jquery';
 const $ = jQuery;
-const urlRegex = /(\W\w*)\W?(.*)/;
+const urlRegex = /(\W[^/]*)\/?(.*)/;
 class PopStateHandler {
   constructor () {
     this.viewMethods = {};

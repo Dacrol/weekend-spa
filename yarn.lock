@@ -634,9 +634,9 @@ hosted-git-info@^2.1.4:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.5.0.tgz#6d60e34b3abbc8313062c3b798ef8d901a07af3c"
 
-husky@^0.15.0-rc.3:
-  version "0.15.0-rc.3"
-  resolved "https://registry.yarnpkg.com/husky/-/husky-0.15.0-rc.3.tgz#13ea91a59bdf29fe8a2ccd6f90cd88e22bd21c76"
+husky@^0.15.0-rc.5:
+  version "0.15.0-rc.5"
+  resolved "https://registry.yarnpkg.com/husky/-/husky-0.15.0-rc.5.tgz#634dbb7d58b2f14c1289d40440f5766274983c2c"
   dependencies:
     cosmiconfig "^4.0.0"
     execa "^0.9.0"
