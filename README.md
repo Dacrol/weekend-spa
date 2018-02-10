@@ -5,7 +5,7 @@ Wrapper for making single page applications with [JsRender](http://www.jsviews.c
 <a name="Renderer"></a>
 
 ## Renderer
-Class for binding and rendering views
+Class for binding and rendering views. Create an instance of Renderer to persist the bindings, which causes any link with the class "pop" to trigger the rendering without reloading the page.
 
 **Kind**: global class
 
