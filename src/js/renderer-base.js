@@ -5,7 +5,7 @@ require('jsrender')(jQuery);
 const $ = jQuery;
 const urlRegex = /(\W[^/]*)\/?(.*)/;
 
-/** Class for binding and rendering views */
+/** Class for binding and rendering views. Create an instance of Renderer to persist the bindings, which causes any link with the class "pop" to trigger the rendering without reloading the page. */
 class Renderer extends PopStateHandler {
   /**
    * Binds a view to a URL
