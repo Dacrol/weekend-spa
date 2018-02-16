@@ -11,7 +11,7 @@ class Renderer extends PopStateHandler {
    * Binds a view to a URL
    *
    * @param {string} [view] The HTML file to render
-   * @param {string} url The path of the view
+   * @param {string} [url] The path of the view
    * @param {Object|Function} [contextData] Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
    * @param {function(Object)|string} [callbackFn] a function with parameter (contextData) to run after the view is rendered.
    * @param {string} [selector] Supply a selector to bind with selector instead of only url
@@ -22,7 +22,9 @@ class Renderer extends PopStateHandler {
       // @ts-ignore
       Renderer.bindView(...arguments);
     };
-    this.bindViewToPopState(url, viewMethod);
+    if (url) {
+      this.bindViewToPopState(url, viewMethod);
+    }
     viewMethod();
   }
 
@@ -30,7 +32,7 @@ class Renderer extends PopStateHandler {
    * Binds a view to a URL (and optionally a selector), and fetches JSON data to use as tag arguments. For more complex operations than basic JSON fetching, please use the normal bindView with contextData supplied as a function.
    *
    * @param {string} view name of the html file with the template to render
-   * @param {string} url URL to bind to
+   * @param {string} [url] URL to bind to
    * @param {(string|string[])} jsonUrl URL(s) for JSON to fetch
    * @param {(string|string[])} dataName name of the data as it is written in the html template file, for example: 'movie' results in the data being accessible with {{:movie}}. Pass one string for each JSON.
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
@@ -51,7 +53,9 @@ class Renderer extends PopStateHandler {
       // @ts-ignore
       Renderer.bindViewWithJSON(...arguments);
     };
-    this.bindViewToPopState(url, viewMethod);
+    if (url) {
+      this.bindViewToPopState(url, viewMethod);
+    }
     viewMethod();
   }
 
@@ -82,7 +86,7 @@ class Renderer extends PopStateHandler {
    *
    * @static
    * @param {string} [view] The HTML file to render
-   * @param {string} url The path of the view
+   * @param {string} [url] The path of the view
    * @param {Object|Function} [contextData] Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
    * @param {function(Object)|string} [callbackFn] a function with parameter (contextData) to run after the view is rendered.
    * @param {string} [selector] Supply a selector to bind with selector instead of only url
@@ -96,27 +100,29 @@ class Renderer extends PopStateHandler {
     if (selector) {
       Renderer.bindViewToSelector(selector, view, url, contextData, callbackFn);
     }
-    $(document).ready(function () {
-      const path = location.pathname;
-      const urlParts = urlRegex.exec(path);
-      // console.log(urlParts);
-      try {
-        if (urlParts[1] === url && typeof contextData !== 'function') {
-          // console.log('!')
-          Object.assign(contextData, { pathParams: urlParts[2] });
-          // console.log(contextData);
-          if (callbackFn && typeof callbackFn === 'function') {
-            Renderer.renderView(view, contextData, callbackFn);
-          } else {
-            Renderer.renderView(view, contextData);
+    if (url) {
+      $(document).ready(function () {
+        const path = location.pathname;
+        const urlParts = urlRegex.exec(path);
+        // console.log(urlParts);
+        try {
+          if (urlParts[1] === url && typeof contextData !== 'function') {
+            // console.log('!')
+            Object.assign(contextData, { pathParams: urlParts[2] });
+            // console.log(contextData);
+            if (callbackFn && typeof callbackFn === 'function') {
+              Renderer.renderView(view, contextData, callbackFn);
+            } else {
+              Renderer.renderView(view, contextData);
+            }
+          } else if (urlParts[1] === url) {
+            contextData(Renderer, urlParts[2]);
           }
-        } else if (urlParts[1] === url) {
-          contextData(Renderer, urlParts[2]);
+        } catch (error) {
+          console.warn('Invalid url: ', error);
         }
-      } catch (error) {
-        console.warn('Invalid url: ', error);
-      }
-    });
+      });
+    }
   }
 
   /**
@@ -125,7 +131,7 @@ class Renderer extends PopStateHandler {
    * @static
    * @param {string} selector Selector to bind to
    * @param {string} [view] The HTML file to render
-   * @param {string} url The path of the view
+   * @param {string} [url] The path of the view
    * @param {Object|Function} [contextData] Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
    * @param {function(Object)} [callbackFn] a function with parameter (contextData) to run each time the view is rendered.
    * @memberof Renderer
@@ -172,7 +178,7 @@ class Renderer extends PopStateHandler {
    *
    * @static
    * @param {string} view name of the html file with the template to render
-   * @param {string} url URL to bind to
+   * @param {string} [url] URL to bind to
    * @param {(string|string[])} jsonUrl URL(s) for JSON to fetch
    * @param {(string|string[])} dataName name of the data as it is written in the html template file, for example: 'movie' results in the data being accessible with {{:movie}}. Pass one string for each JSON.
    * @param {Function} [callbackFn] a function to run each time the view is rendered.
@@ -232,17 +238,16 @@ class Renderer extends PopStateHandler {
         view,
         url,
         async (Renderer, pathParams) => {
-          let contextData = await Promise.all(
+          let contextData = { pathParams: pathParams }
+          let promiseData = await Promise.all(
             // @ts-ignore
             jsonUrl.map((url) => {
               return $.getJSON(url);
             })
           );
-          if (!dataName) {
-            dataName = 'data';
-          }
-          if (typeof dataName === 'string') {
-            let data = { [dataName]: contextData };
+          Object.assign(contextData, promiseData);
+          if (typeof dataName === 'string' || !dataName) {
+            let data = (typeof dataName === 'string' && dataName.trim().length > 0) ? { [dataName]: contextData } : contextData;
             if (
               additionalData &&
               additionalData.constructor.name === 'Object'
@@ -292,6 +297,7 @@ class Renderer extends PopStateHandler {
     selector = '#root',
     viewsFolder = '/views/'
   ) {
+    console.log(contextData);
     return new Promise((resolve, reject) => {
       if (typeof viewFile === 'function' && !callbackFn) {
         callbackFn = viewFile;
