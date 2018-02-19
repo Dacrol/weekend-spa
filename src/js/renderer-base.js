@@ -238,7 +238,7 @@ class Renderer extends PopStateHandler {
         view,
         url,
         async (Renderer, pathParams) => {
-          let contextData = { pathParams: pathParams }
+          let contextData = { pathParams: pathParams };
           let promiseData = await Promise.all(
             // @ts-ignore
             jsonUrl.map((url) => {
@@ -297,7 +297,7 @@ class Renderer extends PopStateHandler {
     selector = '#root',
     viewsFolder = '/views/'
   ) {
-    console.log(contextData);
+    // console.log(contextData);
     return new Promise((resolve, reject) => {
       if (typeof viewFile === 'function' && !callbackFn) {
         callbackFn = viewFile;
