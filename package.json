@@ -3,6 +3,10 @@
   "version": "0.0.2",
   "description": "",
   "main": "src/js/renderer-base.js",
+  "repository": {
+    "url": "https://github.com/Dacrol/weekend-spa",
+    "type": "git"
+  },
   "scripts": {
     "lint": "eslint ."
   },
