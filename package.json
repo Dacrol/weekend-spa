@@ -1,7 +1,7 @@
 {
   "name": "weekend-spa",
-  "version": "0.0.2",
-  "description": "",
+  "version": "0.0.3",
+  "description": "Single-page application wrapper for JsRender",
   "main": "src/js/renderer-base.js",
   "repository": {
     "url": "https://github.com/Dacrol/weekend-spa",
