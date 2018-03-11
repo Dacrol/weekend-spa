@@ -101,7 +101,7 @@ class Renderer extends PopStateHandler {
       Renderer.bindViewToSelector(selector, view, url, contextData, callbackFn);
     }
     if (url) {
-      $(document).ready(function () {
+      $(document).ready(async function () {
         const path = location.pathname;
         const urlParts = urlRegex.exec(path);
         // console.log(urlParts);
@@ -119,9 +119,9 @@ class Renderer extends PopStateHandler {
             contextData(Renderer, urlParts[2]);
           } else if (urlParts[1]) {
             if (callbackFn && typeof callbackFn === 'function') {
-              Renderer.renderView(view, contextData(), callbackFn);
+              Renderer.renderView(view, await contextData(), callbackFn);
             } else {
-              Renderer.renderView(view, contextData());
+              Renderer.renderView(view, await contextData());
             }
           }
         } catch (error) {
@@ -158,7 +158,7 @@ class Renderer extends PopStateHandler {
     if (!$(selector).hasClass('pop') && !$(selector).prop('href')) {
       // Selector is not a link.
       $(selector).unbind('click');
-      $(selector).click(function (e) {
+      $(selector).click(async function (e) {
         e.preventDefault();
         if (typeof contextData !== 'function') {
           Renderer.renderView(view, contextData, callbackFn);
@@ -166,9 +166,9 @@ class Renderer extends PopStateHandler {
           contextData(Renderer);
         } else {
           if (callbackFn && typeof callbackFn === 'function') {
-            Renderer.renderView(view, contextData(), callbackFn);
+            Renderer.renderView(view, await contextData(), callbackFn);
           } else {
-            Renderer.renderView(view, contextData());
+            Renderer.renderView(view, await contextData());
           }
         }
       });
