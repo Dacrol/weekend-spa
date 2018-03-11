@@ -115,8 +115,14 @@ class Renderer extends PopStateHandler {
             } else {
               Renderer.renderView(view, contextData);
             }
-          } else if (urlParts[1] === url) {
+          } else if (urlParts[1] === url && !view) {
             contextData(Renderer, urlParts[2]);
+          } else if (urlParts[1]) {
+            if (callbackFn && typeof callbackFn === 'function') {
+              Renderer.renderView(view, contextData(), callbackFn);
+            } else {
+              Renderer.renderView(view, contextData());
+            }
           }
         } catch (error) {
           console.warn('Invalid url: ', error);
@@ -156,8 +162,14 @@ class Renderer extends PopStateHandler {
         e.preventDefault();
         if (typeof contextData !== 'function') {
           Renderer.renderView(view, contextData, callbackFn);
-        } else {
+        } else if (!view) {
           contextData(Renderer);
+        } else {
+          if (callbackFn && typeof callbackFn === 'function') {
+            Renderer.renderView(view, contextData(), callbackFn);
+          } else {
+            Renderer.renderView(view, contextData());
+          }
         }
       });
     } else if ($(selector).prop('href')) {
@@ -208,7 +220,7 @@ class Renderer extends PopStateHandler {
         jsonUrl = '/' + jsonUrl;
       }
       Renderer.bindView(
-        view,
+        null,
         url,
         function (Renderer, pathParams) {
           // @ts-ignore
@@ -235,7 +247,7 @@ class Renderer extends PopStateHandler {
       );
     } else if (Array.isArray(jsonUrl)) {
       Renderer.bindView(
-        view,
+        null,
         url,
         async (Renderer, pathParams) => {
           let contextData = { pathParams: pathParams };
