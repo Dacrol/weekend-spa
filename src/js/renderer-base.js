@@ -97,6 +97,9 @@ class Renderer extends PopStateHandler {
       selector = callbackFn;
       callbackFn = () => {};
     }
+    if (!contextData) {
+      contextData = {};
+    }
     if (selector) {
       Renderer.bindViewToSelector(selector, view, url, contextData, callbackFn);
     }
