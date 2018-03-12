@@ -122,9 +122,16 @@ class Renderer extends PopStateHandler {
             contextData(Renderer, urlParts[2]);
           } else if (urlParts[1]) {
             if (callbackFn && typeof callbackFn === 'function') {
-              Renderer.renderView(view, await contextData(), callbackFn);
+              Renderer.renderView(
+                view,
+                await contextData(Renderer, urlParts[2]),
+                callbackFn
+              );
             } else {
-              Renderer.renderView(view, await contextData());
+              Renderer.renderView(
+                view,
+                await contextData(Renderer, urlParts[2])
+              );
             }
           }
         } catch (error) {
@@ -168,10 +175,16 @@ class Renderer extends PopStateHandler {
         } else if (!view) {
           contextData(Renderer);
         } else {
+          const path = location.pathname;
+          const urlParts = urlRegex.exec(path);
           if (callbackFn && typeof callbackFn === 'function') {
-            Renderer.renderView(view, await contextData(), callbackFn);
+            Renderer.renderView(
+              view,
+              await contextData(Renderer, urlParts[2]),
+              callbackFn
+            );
           } else {
-            Renderer.renderView(view, await contextData());
+            Renderer.renderView(view, await contextData(Renderer, urlParts[2]));
           }
         }
       });
@@ -262,7 +275,10 @@ class Renderer extends PopStateHandler {
           );
           Object.assign(contextData, promiseData);
           if (typeof dataName === 'string' || !dataName) {
-            let data = (typeof dataName === 'string' && dataName.trim().length > 0) ? { [dataName]: contextData } : contextData;
+            let data =
+              typeof dataName === 'string' && dataName.trim().length > 0
+                ? { [dataName]: contextData }
+                : contextData;
             if (
               additionalData &&
               additionalData.constructor.name === 'Object'
