@@ -124,13 +124,13 @@ class Renderer extends PopStateHandler {
             if (callbackFn && typeof callbackFn === 'function') {
               Renderer.renderView(
                 view,
-                await contextData(Renderer, urlParts[2]),
+                typeof contextData === 'function' ? await contextData(Renderer, urlParts[2]) : contextData,
                 callbackFn
               );
             } else {
               Renderer.renderView(
                 view,
-                await contextData(Renderer, urlParts[2])
+                typeof contextData === 'function' ? await contextData(Renderer, urlParts[2]) : contextData
               );
             }
           }
@@ -180,11 +180,11 @@ class Renderer extends PopStateHandler {
           if (callbackFn && typeof callbackFn === 'function') {
             Renderer.renderView(
               view,
-              await contextData(Renderer, urlParts[2]),
+              typeof contextData === 'function' ? await contextData(Renderer, urlParts[2]) : contextData,
               callbackFn
             );
           } else {
-            Renderer.renderView(view, await contextData(Renderer, urlParts[2]));
+            Renderer.renderView(view, typeof contextData === 'function' ? await contextData(Renderer, urlParts[2]) : contextData);
           }
         }
       });
