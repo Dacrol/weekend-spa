@@ -97,11 +97,14 @@ class Renderer extends PopStateHandler {
       selector = callbackFn;
       callbackFn = () => {};
     }
+    if (!contextData) {
+      contextData = {};
+    }
     if (selector) {
       Renderer.bindViewToSelector(selector, view, url, contextData, callbackFn);
     }
     if (url) {
-      $(document).ready(function () {
+      $(document).ready(async function () {
         const path = location.pathname;
         const urlParts = urlRegex.exec(path);
         // console.log(urlParts);
@@ -115,8 +118,21 @@ class Renderer extends PopStateHandler {
             } else {
               Renderer.renderView(view, contextData);
             }
-          } else if (urlParts[1] === url) {
+          } else if (urlParts[1] === url && !view) {
             contextData(Renderer, urlParts[2]);
+          } else if (urlParts[1]) {
+            if (callbackFn && typeof callbackFn === 'function') {
+              Renderer.renderView(
+                view,
+                typeof contextData === 'function' ? await contextData(Renderer, urlParts[2]) : contextData,
+                callbackFn
+              );
+            } else {
+              Renderer.renderView(
+                view,
+                typeof contextData === 'function' ? await contextData(Renderer, urlParts[2]) : contextData
+              );
+            }
           }
         } catch (error) {
           console.warn('Invalid url: ', error);
@@ -152,12 +168,24 @@ class Renderer extends PopStateHandler {
     if (!$(selector).hasClass('pop') && !$(selector).prop('href')) {
       // Selector is not a link.
       $(selector).unbind('click');
-      $(selector).click(function (e) {
+      $(selector).click(async function (e) {
         e.preventDefault();
         if (typeof contextData !== 'function') {
           Renderer.renderView(view, contextData, callbackFn);
-        } else {
+        } else if (!view) {
           contextData(Renderer);
+        } else {
+          const path = location.pathname;
+          const urlParts = urlRegex.exec(path);
+          if (callbackFn && typeof callbackFn === 'function') {
+            Renderer.renderView(
+              view,
+              typeof contextData === 'function' ? await contextData(Renderer, urlParts[2]) : contextData,
+              callbackFn
+            );
+          } else {
+            Renderer.renderView(view, typeof contextData === 'function' ? await contextData(Renderer, urlParts[2]) : contextData);
+          }
         }
       });
     } else if ($(selector).prop('href')) {
@@ -208,7 +236,7 @@ class Renderer extends PopStateHandler {
         jsonUrl = '/' + jsonUrl;
       }
       Renderer.bindView(
-        view,
+        null,
         url,
         function (Renderer, pathParams) {
           // @ts-ignore
@@ -235,7 +263,7 @@ class Renderer extends PopStateHandler {
       );
     } else if (Array.isArray(jsonUrl)) {
       Renderer.bindView(
-        view,
+        null,
         url,
         async (Renderer, pathParams) => {
           let contextData = { pathParams: pathParams };
@@ -247,7 +275,10 @@ class Renderer extends PopStateHandler {
           );
           Object.assign(contextData, promiseData);
           if (typeof dataName === 'string' || !dataName) {
-            let data = (typeof dataName === 'string' && dataName.trim().length > 0) ? { [dataName]: contextData } : contextData;
+            let data =
+              typeof dataName === 'string' && dataName.trim().length > 0
+                ? { [dataName]: contextData }
+                : contextData;
             if (
               additionalData &&
               additionalData.constructor.name === 'Object'
