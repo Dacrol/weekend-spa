@@ -110,7 +110,7 @@ class Renderer extends PopStateHandler {
         // console.log(urlParts);
         try {
           if (urlParts[1] === url && typeof contextData !== 'function') {
-            // console.log('!')
+            // console.log(view);
             Object.assign(contextData, { pathParams: urlParts[2] });
             // console.log(contextData);
             if (callbackFn && typeof callbackFn === 'function') {
@@ -120,17 +120,21 @@ class Renderer extends PopStateHandler {
             }
           } else if (urlParts[1] === url && !view) {
             contextData(Renderer, urlParts[2]);
-          } else if (urlParts[1]) {
+          } else if (urlParts[1] === url) {
             if (callbackFn && typeof callbackFn === 'function') {
               Renderer.renderView(
                 view,
-                typeof contextData === 'function' ? await contextData(Renderer, urlParts[2]) : contextData,
+                typeof contextData === 'function'
+                  ? await contextData(Renderer, urlParts[2])
+                  : contextData,
                 callbackFn
               );
             } else {
               Renderer.renderView(
                 view,
-                typeof contextData === 'function' ? await contextData(Renderer, urlParts[2]) : contextData
+                typeof contextData === 'function'
+                  ? await contextData(Renderer, urlParts[2])
+                  : contextData
               );
             }
           }
@@ -180,11 +184,18 @@ class Renderer extends PopStateHandler {
           if (callbackFn && typeof callbackFn === 'function') {
             Renderer.renderView(
               view,
-              typeof contextData === 'function' ? await contextData(Renderer, urlParts[2]) : contextData,
+              typeof contextData === 'function'
+                ? await contextData(Renderer, urlParts[2])
+                : contextData,
               callbackFn
             );
           } else {
-            Renderer.renderView(view, typeof contextData === 'function' ? await contextData(Renderer, urlParts[2]) : contextData);
+            Renderer.renderView(
+              view,
+              typeof contextData === 'function'
+                ? await contextData(Renderer, urlParts[2])
+                : contextData
+            );
           }
         }
       });
