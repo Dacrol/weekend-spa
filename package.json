@@ -8,7 +8,8 @@
     "type": "git"
   },
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "publish-next": "npm publish --tag next"
   },
   "husky": {
     "hooks": {
