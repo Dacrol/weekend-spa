@@ -11,7 +11,7 @@ class Renderer extends PopStateHandler {
    * Binds a view to a URL
    *
    * @param {string} [view] The HTML file to render
-   * @param {string} [url] The path of the view
+   * @param {string|Function} [url] The path of the view
    * @param {Object|Function} [contextData] Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
    * @param {function(Object)|string} [callbackFn] a function with parameter (contextData) to run after the view is rendered.
    * @param {string} [selector] Supply a selector to bind with selector instead of only url
@@ -86,7 +86,7 @@ class Renderer extends PopStateHandler {
    *
    * @static
    * @param {string} [view] The HTML file to render
-   * @param {string} [url] The path of the view
+   * @param {string|Function} [url] The path of the view
    * @param {Object|Function} [contextData] Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
    * @param {function(Object)|string} [callbackFn] a function with parameter (contextData) to run after the view is rendered.
    * @param {string} [selector] Supply a selector to bind with selector instead of only url
@@ -100,7 +100,16 @@ class Renderer extends PopStateHandler {
     if (!contextData) {
       contextData = {};
     }
-    if (selector) {
+    if (
+      view &&
+      typeof url === 'function' &&
+      Object.keys(contextData).length === 0 &&
+      typeof contextData !== 'function'
+    ) {
+      contextData = url;
+      url = view;
+    }
+    if (selector && typeof url === 'string') {
       Renderer.bindViewToSelector(selector, view, url, contextData, callbackFn);
     }
     if (url) {
