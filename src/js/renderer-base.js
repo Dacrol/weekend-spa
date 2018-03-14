@@ -1,4 +1,4 @@
-import PopStateHandler from './pop-state-handler.js';
+import PopStateHandler from './pop-state-handler';
 import jQuery from 'jquery';
 // @ts-ignore
 require('jsrender')(jQuery);

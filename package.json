@@ -7,6 +7,9 @@
     "url": "https://github.com/Dacrol/weekend-spa",
     "type": "git"
   },
+  "browserify": {
+    "transform": ["babelify"]
+  },
   "scripts": {
     "lint": "eslint .",
     "publish-next": "npm publish --tag next"
