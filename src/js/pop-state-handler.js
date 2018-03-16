@@ -1,4 +1,3 @@
-
 import jQuery from 'jquery';
 const $ = jQuery;
 const urlRegex = /(\W[^/]*)\/?(.*)/;
@@ -24,10 +23,10 @@ class PopStateHandler {
     // $('a.pop').unbind('click');
     $(document).off('click', 'a.pop');
     $(document).on('click', 'a.pop', function (e) {
+      e.preventDefault();
       let href = $(this).attr('href');
       history.pushState(null, null, href);
       that.changePage();
-      e.preventDefault();
     });
   }
 
@@ -37,7 +36,11 @@ class PopStateHandler {
     $('header a').removeClass('active');
     $(`header a[href="${url}"]`).addClass('active');
     let urlPart = urlParts[1];
-    this.viewMethods[urlPart]();
+    try {
+      this.viewMethods[urlPart]();
+    } catch (e) {
+      throw new Error(urlPart + ' has no associated view!');
+    }
     this.addEventHandler();
   }
 }

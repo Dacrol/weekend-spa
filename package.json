@@ -1,14 +1,18 @@
 {
   "name": "weekend-spa",
-  "version": "0.0.3",
+  "version": "0.1.0-alpha.5",
   "description": "Single-page application wrapper for JsRender",
   "main": "src/js/renderer-base.js",
   "repository": {
     "url": "https://github.com/Dacrol/weekend-spa",
     "type": "git"
   },
+  "browserify": {
+    "transform": ["babelify"]
+  },
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "publish-next": "npm publish --tag next"
   },
   "husky": {
     "hooks": {

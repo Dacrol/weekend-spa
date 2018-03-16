@@ -1,4 +1,4 @@
-import PopStateHandler from './pop-state-handler.js';
+import PopStateHandler from './pop-state-handler';
 import jQuery from 'jquery';
 // @ts-ignore
 require('jsrender')(jQuery);
@@ -11,7 +11,7 @@ class Renderer extends PopStateHandler {
    * Binds a view to a URL
    *
    * @param {string} [view] The HTML file to render
-   * @param {string} [url] The path of the view
+   * @param {string|Function} [url] The path of the view
    * @param {Object|Function} [contextData] Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
    * @param {function(Object)|string} [callbackFn] a function with parameter (contextData) to run after the view is rendered.
    * @param {string} [selector] Supply a selector to bind with selector instead of only url
@@ -86,7 +86,7 @@ class Renderer extends PopStateHandler {
    *
    * @static
    * @param {string} [view] The HTML file to render
-   * @param {string} [url] The path of the view
+   * @param {string|Function} [url] The path of the view
    * @param {Object|Function} [contextData] Object containing tag data, which can be accessed in the html view with {{:key}} (see JSRender API), or a function. Providing the data as an array will render the template once for each item in the array. A provided function can execute any code and has access to the parameters Renderer and pathParams.
    * @param {function(Object)|string} [callbackFn] a function with parameter (contextData) to run after the view is rendered.
    * @param {string} [selector] Supply a selector to bind with selector instead of only url
@@ -97,17 +97,30 @@ class Renderer extends PopStateHandler {
       selector = callbackFn;
       callbackFn = () => {};
     }
-    if (selector) {
+    if (!contextData) {
+      contextData = {};
+    }
+    if (
+      view &&
+      typeof url === 'function' &&
+      Object.keys(contextData).length === 0 &&
+      typeof contextData !== 'function'
+    ) {
+      contextData = url;
+      url = view;
+      view = '';
+    }
+    if (selector && typeof url === 'string') {
       Renderer.bindViewToSelector(selector, view, url, contextData, callbackFn);
     }
     if (url) {
-      $(document).ready(function () {
+      $(document).ready(async function () {
         const path = location.pathname;
         const urlParts = urlRegex.exec(path);
         // console.log(urlParts);
         try {
           if (urlParts[1] === url && typeof contextData !== 'function') {
-            // console.log('!')
+            // console.log(view);
             Object.assign(contextData, { pathParams: urlParts[2] });
             // console.log(contextData);
             if (callbackFn && typeof callbackFn === 'function') {
@@ -115,8 +128,25 @@ class Renderer extends PopStateHandler {
             } else {
               Renderer.renderView(view, contextData);
             }
-          } else if (urlParts[1] === url) {
+          } else if (urlParts[1] === url && !view) {
             contextData(Renderer, urlParts[2]);
+          } else if (urlParts[1] === url) {
+            if (callbackFn && typeof callbackFn === 'function') {
+              Renderer.renderView(
+                view,
+                typeof contextData === 'function'
+                  ? await contextData(Renderer, urlParts[2])
+                  : contextData,
+                callbackFn
+              );
+            } else {
+              Renderer.renderView(
+                view,
+                typeof contextData === 'function'
+                  ? await contextData(Renderer, urlParts[2])
+                  : contextData
+              );
+            }
           }
         } catch (error) {
           console.warn('Invalid url: ', error);
@@ -152,12 +182,31 @@ class Renderer extends PopStateHandler {
     if (!$(selector).hasClass('pop') && !$(selector).prop('href')) {
       // Selector is not a link.
       $(selector).unbind('click');
-      $(selector).click(function (e) {
+      $(selector).click(async function (e) {
         e.preventDefault();
         if (typeof contextData !== 'function') {
           Renderer.renderView(view, contextData, callbackFn);
-        } else {
+        } else if (!view) {
           contextData(Renderer);
+        } else {
+          const path = location.pathname;
+          const urlParts = urlRegex.exec(path);
+          if (callbackFn && typeof callbackFn === 'function') {
+            Renderer.renderView(
+              view,
+              typeof contextData === 'function'
+                ? await contextData(Renderer, urlParts[2])
+                : contextData,
+              callbackFn
+            );
+          } else {
+            Renderer.renderView(
+              view,
+              typeof contextData === 'function'
+                ? await contextData(Renderer, urlParts[2])
+                : contextData
+            );
+          }
         }
       });
     } else if ($(selector).prop('href')) {
@@ -208,7 +257,7 @@ class Renderer extends PopStateHandler {
         jsonUrl = '/' + jsonUrl;
       }
       Renderer.bindView(
-        view,
+        null,
         url,
         function (Renderer, pathParams) {
           // @ts-ignore
@@ -235,7 +284,7 @@ class Renderer extends PopStateHandler {
       );
     } else if (Array.isArray(jsonUrl)) {
       Renderer.bindView(
-        view,
+        null,
         url,
         async (Renderer, pathParams) => {
           let contextData = { pathParams: pathParams };
@@ -247,7 +296,10 @@ class Renderer extends PopStateHandler {
           );
           Object.assign(contextData, promiseData);
           if (typeof dataName === 'string' || !dataName) {
-            let data = (typeof dataName === 'string' && dataName.trim().length > 0) ? { [dataName]: contextData } : contextData;
+            let data =
+              typeof dataName === 'string' && dataName.trim().length > 0
+                ? { [dataName]: contextData }
+                : contextData;
             if (
               additionalData &&
               additionalData.constructor.name === 'Object'
