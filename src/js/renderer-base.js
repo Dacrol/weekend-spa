@@ -108,6 +108,7 @@ class Renderer extends PopStateHandler {
     ) {
       contextData = url;
       url = view;
+      view = '';
     }
     if (selector && typeof url === 'string') {
       Renderer.bindViewToSelector(selector, view, url, contextData, callbackFn);
