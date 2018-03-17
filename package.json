@@ -8,11 +8,14 @@
     "type": "git"
   },
   "browserify": {
-    "transform": ["babelify"]
+    "transform": [
+      "babelify"
+    ]
   },
   "scripts": {
     "lint": "eslint .",
-    "publish-next": "npm publish --tag next"
+    "publish-next": "npm publish --tag next",
+    "doc": "jsdoc2md --separators ./src/js/renderer-base.js"
   },
   "husky": {
     "hooks": {
@@ -35,6 +38,7 @@
     "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-standard": "^3.0.1",
-    "husky": "^0.15.0-rc.5"
+    "husky": "^0.15.0-rc.5",
+    "jsdoc-to-markdown": "^4.0.1"
   }
 }
