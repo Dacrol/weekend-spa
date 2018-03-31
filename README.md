@@ -1,5 +1,8 @@
 # Weekend-SPA
-Wrapper for making single page applications with [JsRender](http://www.jsviews.com/). See [JsRender API](http://www.jsviews.com/#jsrapi) for how to make html templates.
+#### Wrapper for making single page applications with [JsRender](http://www.jsviews.com/). 
+This module's main purpose is to simplify binding view templates to URLs or selectors with dynamic context data. When triggered it asynchronously fetches and renders the matching template files from a static source, while preventing full page reloads and only rewriting part of the DOM. Additional features include automatic handling of browser history manipulation to enable back/forward navigation on view changes, fetching JSON data alongside the view templates for use as context data in the rendering, and directly rendering views within any part of the page.
+
+See the [JsRender API](http://www.jsviews.com/#jsrapi) for how to use html templating.
 
 ## API 
 
