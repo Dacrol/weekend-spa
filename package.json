@@ -1,6 +1,6 @@
 {
   "name": "weekend-spa",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Single-page application nanoframework and wrapper for JsRender",
   "main": "src/js/renderer-base.js",
   "repository": {
